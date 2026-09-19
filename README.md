@@ -1,3 +1,9 @@
+## Demo recordings
+
+- [Website demo — part 1](https://drive.google.com/file/d/1g_jGqmHGk1pibKc6gY5evXGAsJTyeepw/view?usp=sharing)
+- [Website demo — part 2](https://drive.google.com/file/d/176s_8PyMJEv1eQTythBApk0qoZp8_xc3/view?usp=sharing)
+- [Mobile app demo](https://drive.google.com/file/d/1URg7PDt_SlyGlzIpJR6ZFT4VeiBbufKU/view?usp=sharing)
+
 # FlightFinder
 
 Cross-platform flight search app built with **React Native**, **TypeScript**, and **Expo (SDK 57)**.  
