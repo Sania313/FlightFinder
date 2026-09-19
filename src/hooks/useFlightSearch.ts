@@ -38,7 +38,7 @@ export function useFlightSearch() {
           ? (err as SearchError)
           : {
               kind: 'unknown' as const,
-              message: 'Something went wrong. Please try again or use Demo Mode.',
+              message: 'Something went wrong. Please try again or try sample data.',
             };
       setError(searchError);
       setFlights([]);

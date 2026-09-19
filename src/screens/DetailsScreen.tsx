@@ -36,7 +36,7 @@ export default function DetailsScreen() {
         <FadeInView>
           {flight.isDemo ? (
             <View style={styles.demoBanner}>
-              <Text style={styles.demoText}>Sample data — Demo Mode</Text>
+              <Text style={styles.demoText}>Sample data · not live prices</Text>
             </View>
           ) : null}
 

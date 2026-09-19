@@ -2,7 +2,7 @@ import { Flight, SearchParams } from '../models/flight';
 
 export type SearchStackParamList = {
   SearchHome: undefined;
-  Results: { params: SearchParams; demoMode: boolean };
+  Results: { params: SearchParams; useSampleData: boolean };
   Details: { flight: Flight };
 };
 

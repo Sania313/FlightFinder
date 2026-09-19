@@ -21,7 +21,7 @@ function classifyError(status: number, message: string): SearchError {
     return {
       kind: 'rate_limit',
       message:
-        'Live search is temporarily unavailable because the API usage limit was reached. Try Demo Mode or retry later.',
+        'Live search is temporarily unavailable because the API usage limit was reached. Try sample data or retry later.',
     };
   }
 
@@ -30,19 +30,19 @@ function classifyError(status: number, message: string): SearchError {
       return {
         kind: 'network',
         message:
-          'Could not reach the local API proxy. Start it with "npm run proxy" in a second terminal, or use Demo Mode.',
+          'Could not reach the local API proxy. Start it with "npm run proxy" in a second terminal, or try sample data.',
       };
     }
     return {
       kind: 'network',
-      message: 'Unable to reach the flight service. Check your connection or use Demo Mode.',
+      message: 'Unable to reach the flight service. Check your connection or try sample data.',
     };
   }
 
   return {
     kind: 'api',
     message:
-      message || 'Something went wrong while searching for flights. Please try again or use Demo Mode.',
+      message || 'Something went wrong while searching for flights. Please try again or use sample data.',
   };
 }
 

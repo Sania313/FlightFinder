@@ -1,101 +1,214 @@
 # FlightFinder
 
-Cross-platform flight search app built with React Native, TypeScript, and Expo (SDK 57). Runs on mobile and web. Live results use SerpAPI Google Flights; reviewers can use **Demo Mode** without an API key.
+Cross-platform flight search app built with **React Native**, **TypeScript**, and **Expo (SDK 57)**.  
+Runs on **mobile** (Expo Go) and in a **web browser**.
 
-## Setup
+Live results use the SerpAPI Google Flights API through a small local proxy.  
+Reviewers can complete the full flow with **sample data** (no API key required).
 
-1. Install dependencies:
+> **Deployment is optional.** Clear local run instructions below are enough for review.
+
+---
+
+## Prerequisites
+
+- Node.js 20+ (Node 22 works)
+- npm
+- For phone testing: [Expo Go](https://expo.dev/go) on iOS or Android
+- An Expo account (needed to open projects in newer Expo Go — run `npx expo login`)
+
+---
+
+## Local run (step by step)
+
+### 1. Install dependencies
 
 ```bash
+cd FlightFinder
 npm install
 ```
 
-2. Copy the example environment file and add your SerpAPI key (optional if you only use Demo Mode):
+### 2. Environment file
 
 ```bash
 cp .env.example .env
 ```
 
+On Windows PowerShell (if `cp` is unavailable):
+
+```powershell
+Copy-Item .env.example .env
+```
+
 Edit `.env`:
 
-```
+```env
+# Required for LIVE search only (used by the local proxy — not committed)
 SERPAPI_KEY=your_serpapi_key_here
+
+# Leave empty so the key is not bundled into the client
+EXPO_PUBLIC_SERPAPI_KEY=
+
+# Optional; defaults to http://localhost:8787/api
+EXPO_PUBLIC_API_PROXY_URL=http://localhost:8787/api
 ```
 
-Never commit a real API key. `.env` is gitignored.
+- Never commit a real API key (`.env` is gitignored).
+- If you only use **sample data**, you can leave `SERPAPI_KEY` empty.
 
-3. Start the local API proxy (terminal 1):
+### 3. Start the local API proxy (Terminal 1) — needed for live search
 
 ```bash
 npm run proxy
 ```
 
-4. Start the app (terminal 2):
+You should see:
+
+```text
+FlightFinder proxy listening on http://localhost:8787
+```
+
+Leave this terminal open.
+
+**If you see `EADDRINUSE ... 8787`:** an old proxy is already running. Either use that one, or stop it and start again:
+
+```powershell
+netstat -ano | findstr :8787
+taskkill /PID <pid> /F
+npm run proxy
+```
+
+After changing `.env`, always restart the proxy so it reloads the key.
+
+### 4. Start the app (Terminal 2)
 
 ```bash
 npm start
 ```
 
-Then press `w` for web, `a` for Android, or `i` for iOS (simulator/device via Expo Go).
+Then choose a target:
 
-Demo Mode needs neither the key nor the proxy.
+| Key | Target |
+|-----|--------|
+| `w` | Web browser |
+| Scan QR | Phone with Expo Go (same Wi‑Fi) |
+| `a` / `i` | Android / iOS simulator (if installed) |
 
-### Why a proxy?
+#### Phone (Expo Go)
 
-SerpAPI does not send CORS headers, so a browser cannot call it directly — a web-only
-`Failed to fetch` / CORS error is the result. `server/proxy.mjs` forwards the request
-server-side and keeps `SERPAPI_KEY` out of the client bundle. The app resolves the proxy
-host automatically (`localhost` on web, the Expo LAN host on a device); override it with
-`EXPO_PUBLIC_API_PROXY_URL` if needed.
+1. Sign in to Expo Go with the **same** account as your computer.
+2. On the computer, ensure you are logged in:
 
-### Useful scripts
+```bash
+npx expo login
+npx expo whoami
+```
+
+3. Phone and computer on the **same Wi‑Fi**.
+4. Scan the QR code from `npm start`.
+5. Keep `npm run proxy` running for **live** search on the phone (the app talks to your computer’s proxy on the LAN).
+
+#### Web
+
+Press `w` after `npm start`, or run:
+
+```bash
+npm run web
+```
+
+---
+
+## Two ways to use the app
+
+### A) Sample data (no key, no proxy)
+
+Best for reviewers without SerpAPI access:
+
+1. Open the app (web or phone).
+2. On Search, tap **No API? Try sample data**,  
+   **or** if live search fails, tap **Try sample data**.
+3. Results show a bar: **Sample data · not live prices**.
+4. You can sort, filter, open details, and save flights.
+
+Suggested search values (also pre-filled): **YYZ → LHR**, future dates, 1 passenger, round trip.
+
+### B) Live SerpAPI search
+
+1. Set `SERPAPI_KEY` in `.env`.
+2. Run **proxy** (Terminal 1) + **app** (Terminal 2).
+3. Tap **Search flights** (leave sample link unused).
+4. You should see real airline results.
+
+---
+
+## Useful scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Start Expo dev server |
-| `npm run proxy` | Start the local SerpAPI proxy |
+| `npm install` | Install dependencies |
+| `npm run proxy` | Local SerpAPI proxy (`localhost:8787`) |
+| `npm start` | Expo dev server |
 | `npm run web` | Open web |
 | `npm run android` | Open Android |
 | `npm run ios` | Open iOS |
 | `npm test` | Run automated tests |
 
-## Demo Mode
+---
 
-On the Search screen, turn on **Demo Mode**. Search uses a local sample dataset (`src/data/demoFlights.ts`) so sorting, filtering, details, and saving work without network access or credentials. Sample results are labelled clearly.
+## Why a local proxy?
 
-Suggested demo search: **YYZ → LHR**, future departure/return dates, 1 passenger, round trip (pre-filled on the form).
+SerpAPI does not send browser CORS headers, so a web app cannot call it directly.  
+`server/proxy.mjs` calls SerpAPI on the server side and keeps `SERPAPI_KEY` out of the client bundle.
+
+- Web → `http://localhost:8787/api/...`
+- Phone (Expo Go) → `http://<your-computer-lan-ip>:8787/api/...` (resolved automatically)
+
+---
+
+## Tests
+
+```bash
+npm test
+```
 
 ## Manual test checklist
 
 - [ ] Validation: empty origin/destination, same airports, missing departure, return before departure, passengers &lt; 1
-- [ ] Demo Mode: multiple results, sort by lowest price, non-stop filter
-- [ ] Open a result → details show itinerary segments
-- [ ] Save a flight → appears on Saved tab after restart
+- [ ] Sample data: multiple results, sort (lowest price), filter (non-stop only)
+- [ ] Details show itinerary segments for the selected flight
+- [ ] Save / remove flight; saved list persists after restart
 - [ ] Saving the same flight twice does not create duplicates
-- [ ] Live search (proxy running): loading state; Search button disabled while loading
-- [ ] Error path: stop the proxy or go offline → error message + Use Demo Mode
-- [ ] Layout readable at phone width and in a desktop browser
+- [ ] Live search (proxy + key): loading state; Search disabled while loading
+- [ ] Error path: stop proxy or remove key → clear error + **Try sample data**
+- [ ] Usable at phone width and in a desktop browser
+
+---
 
 ## Project structure (important files)
 
-- `src/services/serpApi.ts` — SerpAPI request (direct on native, via proxy on web)
-- `server/proxy.mjs` — local proxy that keeps the API key server-side
-- `src/services/flightMapper.ts` — response → app `Flight` model
-- `src/data/demoFlights.ts` — Demo Mode sample data
-- `src/storage/savedFlights.ts` — AsyncStorage persistence
-- `src/screens/*` — Search, Results, Details, Saved
-- `src/utils/validation.ts` — search validation
+| Path | Role |
+|------|------|
+| `src/services/serpApi.ts` | Flight search request (via proxy on web) |
+| `server/proxy.mjs` | Local proxy; holds API key |
+| `src/services/flightMapper.ts` | SerpAPI JSON → app `Flight` model |
+| `src/data/demoFlights.ts` | Sample / Demo Mode dataset |
+| `src/storage/savedFlights.ts` | AsyncStorage save / remove / load |
+| `src/screens/*` | Search, Results, Details, Saved |
+| `src/utils/validation.ts` | Search form validation |
+| `DEVELOPMENT-NOTES.md` | Approach, AI use, problems, limitations |
 
-## Build
+---
 
-For a production web export:
+## Optional: web export (not required for review)
 
 ```bash
 npx expo export --platform web
 ```
 
-For native builds, use EAS Build or a local Expo prebuild workflow as needed.
+Output is written for static hosting. A public deploy is **not required**; local run is sufficient per the assignment.
+
+---
 
 ## Limitations
 
-See `DEVELOPMENT-NOTES.md`.
+See `DEVELOPMENT-NOTES.md` (round-trip outbound focus, text date inputs, local proxy required for live web search, etc.).

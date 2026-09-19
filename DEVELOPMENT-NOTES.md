@@ -4,7 +4,7 @@
 
 The app is a small Expo (SDK 57) TypeScript project with tab navigation (Search / Saved) and a stack for Results → Details.
 
-- **Data flow:** Search form validates input → Results screen calls either Demo Mode sample data or `fetchFlights` in `src/services/serpApi.ts` → `mapSerpFlightsResponse` in `src/services/flightMapper.ts` converts SerpAPI JSON into a simple `Flight` model → Results apply in-memory sort (lowest price / shortest) and filter (non-stop) → Details shows segments → Save uses AsyncStorage via `src/storage/savedFlights.ts` (deduped by `id`).
+- **Data flow:** Search form validates input → Results screen calls either local sample data or `fetchFlights` in `src/services/serpApi.ts` → `mapSerpFlightsResponse` in `src/services/flightMapper.ts` converts SerpAPI JSON into a simple `Flight` model → Results apply in-memory sort (lowest price / shortest) and filter (non-stop) → Details shows segments → Save uses AsyncStorage via `src/storage/savedFlights.ts` (deduped by `id`). Live search is the default; sample data is offered as a fallback when the API fails or via a subtle “Try sample data” link.
 - **API access:** `server/proxy.mjs` is a small Node proxy that adds the API key server-side. Web always goes through it because SerpAPI sends no CORS headers; this also keeps the key out of the web bundle.
 - **Storage:** `@react-native-async-storage/async-storage` so saved flights persist on device and in the browser.
 - **Libraries:** React Navigation (native stack + bottom tabs), Expo Status Bar, AsyncStorage. No custom backend.

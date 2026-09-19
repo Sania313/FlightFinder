@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SearchParams } from '../models/flight';
 import { validateSearch } from '../utils/validation';
@@ -8,9 +8,8 @@ import FadeInView from './FadeInView';
 import PressableScale from './PressableScale';
 
 interface Props {
-  onSearch: (params: SearchParams, demoMode: boolean) => void;
+  onSearch: (params: SearchParams, useSampleData: boolean) => void;
   loading?: boolean;
-  initialDemoMode?: boolean;
 }
 
 function defaultFutureDate(daysAhead: number): string {
@@ -19,20 +18,15 @@ function defaultFutureDate(daysAhead: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-export default function SearchForm({ onSearch, loading = false, initialDemoMode = false }: Props) {
+export default function SearchForm({ onSearch, loading = false }: Props) {
   const [origin, setOrigin] = useState('YYZ');
   const [destination, setDestination] = useState('LHR');
   const [departureDate, setDepartureDate] = useState(defaultFutureDate(30));
   const [returnDate, setReturnDate] = useState(defaultFutureDate(37));
   const [passengers, setPassengers] = useState('1');
-  const [demoMode, setDemoMode] = useState(initialDemoMode);
   const [error, setError] = useState('');
 
-  const handleSearch = () => {
-    if (loading) {
-      return;
-    }
-
+  const buildParams = (): SearchParams | null => {
     const params: SearchParams = {
       origin: origin.trim().toUpperCase(),
       destination: destination.trim().toUpperCase(),
@@ -45,11 +39,22 @@ export default function SearchForm({ onSearch, loading = false, initialDemoMode 
     const result = validateSearch(params);
     if (!result.isValid) {
       setError(result.message);
-      return;
+      return null;
     }
 
     setError('');
-    onSearch(params, demoMode);
+    return params;
+  };
+
+  const handleSearch = (useSampleData: boolean) => {
+    if (loading) {
+      return;
+    }
+    const params = buildParams();
+    if (!params) {
+      return;
+    }
+    onSearch(params, useSampleData);
   };
 
   const swapAirports = () => {
@@ -64,21 +69,7 @@ export default function SearchForm({ onSearch, loading = false, initialDemoMode 
         <Text style={styles.subheading}>Find round-trip fares for mobile and web.</Text>
       </FadeInView>
 
-      <FadeInView delay={80} style={styles.demoRow}>
-        <View style={styles.demoCopy}>
-          <Text style={styles.demoTitle}>Demo Mode</Text>
-          <Text style={styles.demoHint}>Sample data — no API key required.</Text>
-        </View>
-        <Switch
-          value={demoMode}
-          onValueChange={setDemoMode}
-          trackColor={{ false: colors.border, true: colors.accent }}
-          thumbColor={colors.white}
-          accessibilityLabel="Demo Mode"
-        />
-      </FadeInView>
-
-      <FadeInView delay={140} style={styles.formCard}>
+      <FadeInView delay={100} style={styles.formCard}>
         <View style={styles.routeBlock}>
           <View style={styles.fieldHalf}>
             <Text style={styles.label}>Origin</Text>
@@ -158,7 +149,7 @@ export default function SearchForm({ onSearch, loading = false, initialDemoMode 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <PressableScale
-          onPress={handleSearch}
+          onPress={() => handleSearch(false)}
           disabled={loading}
           accessibilityRole="button"
           accessibilityState={{ disabled: loading }}
@@ -179,6 +170,16 @@ export default function SearchForm({ onSearch, loading = false, initialDemoMode 
             </Text>
           </LinearGradient>
         </PressableScale>
+
+        <PressableScale
+          onPress={() => handleSearch(true)}
+          disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel="Try sample data without API"
+          style={styles.sampleLinkWrap}
+        >
+          <Text style={styles.sampleLink}>No API? Try sample data</Text>
+        </PressableScale>
       </FadeInView>
     </View>
   );
@@ -198,30 +199,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: 20,
     maxWidth: 420,
-  },
-  demoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.demoBg,
-    borderRadius: radii.md,
-    padding: 14,
-    marginBottom: 16,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(138, 90, 0, 0.12)',
-  },
-  demoCopy: {
-    flex: 1,
-  },
-  demoTitle: {
-    fontWeight: '700',
-    color: colors.demo,
-    marginBottom: 2,
-  },
-  demoHint: {
-    color: colors.textMuted,
-    fontSize: 13,
   },
   formCard: {
     backgroundColor: colors.surface,
@@ -291,6 +268,16 @@ const styles = StyleSheet.create({
   },
   buttonTextDisabled: {
     color: colors.primaryDark,
+  },
+  sampleLinkWrap: {
+    marginTop: 14,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  sampleLink: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 14,
   },
   error: {
     color: colors.error,

@@ -12,8 +12,8 @@ type Props = NativeStackScreenProps<SearchStackParamList, 'SearchHome'>;
 export default function SearchScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
 
-  const handleSearch = (params: SearchParams, demoMode: boolean) => {
-    navigation.navigate('Results', { params, demoMode });
+  const handleSearch = (params: SearchParams, useSampleData: boolean) => {
+    navigation.navigate('Results', { params, useSampleData });
   };
 
   return (
