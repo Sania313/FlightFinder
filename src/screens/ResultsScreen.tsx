@@ -8,7 +8,9 @@ import SortFilterBar from '../components/SortFilterBar';
 import FlightList from '../components/FlightList';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
-import { colors } from '../theme/colors';
+import ScreenBackground from '../components/ScreenBackground';
+import FadeInView from '../components/FadeInView';
+import { colors, radii } from '../theme/colors';
 
 type Props = NativeStackScreenProps<SearchStackParamList, 'Results'>;
 
@@ -42,13 +44,15 @@ export default function ResultsScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View style={styles.container}>
+    <ScreenBackground>
       {(usedDemo || demoMode) && (
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>
-            Showing sample Demo Mode data — not live flight prices.
-          </Text>
-        </View>
+        <FadeInView>
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>
+              Showing sample Demo Mode data — not live flight prices.
+            </Text>
+          </View>
+        </FadeInView>
       )}
 
       <FlightList
@@ -69,23 +73,24 @@ export default function ResultsScreen({ navigation, route }: Props) {
           />
         }
       />
-    </View>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   banner: {
+    marginHorizontal: 16,
+    marginTop: 12,
     backgroundColor: colors.demoBg,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(138, 90, 0, 0.12)',
   },
   bannerText: {
     color: colors.demo,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 13,
   },
 });

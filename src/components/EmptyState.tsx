@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, radii, typography } from '../theme/colors';
+import FadeInView from './FadeInView';
 
 interface Props {
   title: string;
@@ -9,10 +10,13 @@ interface Props {
 
 export default function EmptyState({ title, message }: Props) {
   return (
-    <View style={styles.container}>
+    <FadeInView style={styles.container}>
+      <View style={styles.iconWrap}>
+        <Text style={styles.icon}>···</Text>
+      </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
-    </View>
+    </FadeInView>
   );
 }
 
@@ -21,19 +25,34 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: 28,
+  },
+  iconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: radii.lg,
+    backgroundColor: colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  icon: {
+    color: colors.primary,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 2,
   },
   title: {
+    ...typography.title,
     fontSize: 18,
-    fontWeight: '700',
     color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   message: {
-    fontSize: 15,
+    ...typography.subtitle,
     color: colors.textMuted,
     textAlign: 'center',
-    lineHeight: 22,
+    maxWidth: 320,
   },
 });

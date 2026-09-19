@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SortOption } from '../utils/sortFilter';
-import { colors } from '../theme/colors';
+import { colors, radii, typography } from '../theme/colors';
+import PressableScale from './PressableScale';
 
 interface Props {
   sortBy: SortOption;
@@ -54,14 +55,14 @@ function Chip({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity
+    <PressableScale
       style={[styles.chip, active && styles.chipActive]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
     >
       <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
-    </TouchableOpacity>
+    </PressableScale>
   );
 }
 
@@ -69,18 +70,15 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 4,
     paddingBottom: 12,
-    backgroundColor: colors.background,
   },
   label: {
-    fontSize: 12,
-    fontWeight: '700',
+    ...typography.caption,
     color: colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
     marginBottom: 8,
   },
   filterLabel: {
-    marginTop: 10,
+    marginTop: 12,
   },
   row: {
     flexDirection: 'row',
@@ -91,9 +89,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radii.sm,
   },
   chipActive: {
     backgroundColor: colors.primary,
@@ -102,9 +100,9 @@ const styles = StyleSheet.create({
   chipText: {
     color: colors.text,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   chipTextActive: {
-    color: '#fff',
+    color: colors.white,
   },
 });

@@ -1,7 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { StyleSheet, Text, View } from 'react-native';
+import { colors, radii, typography } from '../theme/colors';
 import { SearchError } from '../models/flight';
+import FadeInView from './FadeInView';
+import PressableScale from './PressableScale';
+import ScreenBackground from './ScreenBackground';
 
 interface Props {
   error: SearchError;
@@ -11,24 +14,28 @@ interface Props {
 
 export default function ErrorState({ error, onRetry, onUseDemo }: Props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {error.kind === 'rate_limit' ? 'Live search unavailable' : 'Something went wrong'}
-      </Text>
-      <Text style={styles.message}>{error.message}</Text>
-      <View style={styles.actions}>
-        {onRetry ? (
-          <TouchableOpacity style={styles.secondary} onPress={onRetry} accessibilityRole="button">
-            <Text style={styles.secondaryText}>Retry</Text>
-          </TouchableOpacity>
-        ) : null}
-        {onUseDemo ? (
-          <TouchableOpacity style={styles.primary} onPress={onUseDemo} accessibilityRole="button">
-            <Text style={styles.primaryText}>Use Demo Mode</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-    </View>
+    <ScreenBackground>
+      <FadeInView style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.kicker}>
+            {error.kind === 'rate_limit' ? 'Live search unavailable' : 'Something went wrong'}
+          </Text>
+          <Text style={styles.message}>{error.message}</Text>
+          <View style={styles.actions}>
+            {onRetry ? (
+              <PressableScale style={styles.secondary} onPress={onRetry} accessibilityRole="button">
+                <Text style={styles.secondaryText}>Retry</Text>
+              </PressableScale>
+            ) : null}
+            {onUseDemo ? (
+              <PressableScale style={styles.primary} onPress={onUseDemo} accessibilityRole="button">
+                <Text style={styles.primaryText}>Use Demo Mode</Text>
+              </PressableScale>
+            ) : null}
+          </View>
+        </View>
+      </FadeInView>
+    </ScreenBackground>
   );
 }
 
@@ -38,48 +45,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: colors.errorBg,
   },
-  title: {
+  card: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: 22,
+  },
+  kicker: {
+    ...typography.title,
     fontSize: 18,
-    fontWeight: '700',
     color: colors.error,
-    marginBottom: 8,
-    textAlign: 'center',
+    marginBottom: 10,
   },
   message: {
-    fontSize: 15,
+    ...typography.subtitle,
     color: colors.text,
-    textAlign: 'center',
-    lineHeight: 22,
     marginBottom: 20,
   },
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center',
+    gap: 10,
   },
   primary: {
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radii.sm,
   },
   primaryText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: colors.white,
+    fontWeight: '700',
   },
   secondary: {
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceMuted,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radii.sm,
   },
   secondaryText: {
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

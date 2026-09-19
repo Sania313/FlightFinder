@@ -32,9 +32,12 @@ export default function FlightList({
     <FlatList
       data={flights}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <FlightCard flight={item} onPress={() => onSelect(item)} />}
+      renderItem={({ item, index }) => (
+        <FlightCard flight={item} index={index} onPress={() => onSelect(item)} />
+      )}
       contentContainerStyle={styles.list}
       ListHeaderComponent={ListHeaderComponent}
+      showsVerticalScrollIndicator={false}
     />
   );
 }
@@ -42,7 +45,7 @@ export default function FlightList({
 const styles = StyleSheet.create({
   list: {
     padding: 16,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   empty: {
     flex: 1,

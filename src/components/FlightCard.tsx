@@ -1,136 +1,201 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { Flight } from '../models/flight';
 import { formatDateTime, formatDuration, formatPrice, formatStops } from '../utils/format';
-import { colors } from '../theme/colors';
+import { colors, radii, typography } from '../theme/colors';
+import FadeInView from './FadeInView';
+import PressableScale from './PressableScale';
 
 interface Props {
   flight: Flight;
   onPress: () => void;
+  index?: number;
 }
 
-export default function FlightCard({ flight, onPress }: Props) {
+export default function FlightCard({ flight, onPress, index = 0 }: Props) {
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${flight.airline} ${flight.origin} to ${flight.destination}`}
-    >
-      <View style={styles.header}>
-        <View style={styles.airlineRow}>
-          {flight.airlineLogo ? (
-            <Image source={{ uri: flight.airlineLogo }} style={styles.logo} />
-          ) : (
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoInitial}>{flight.airline.charAt(0)}</Text>
+    <FadeInView delay={Math.min(index * 55, 280)}>
+      <PressableScale
+        style={styles.card}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${flight.airline} ${flight.origin} to ${flight.destination}`}
+      >
+        <View style={styles.header}>
+          <View style={styles.airlineRow}>
+            {flight.airlineLogo ? (
+              <Image source={{ uri: flight.airlineLogo }} style={styles.logo} />
+            ) : (
+              <View style={styles.logoPlaceholder}>
+                <Text style={styles.logoInitial}>{flight.airline.charAt(0)}</Text>
+              </View>
+            )}
+            <Text style={styles.airline} numberOfLines={1}>
+              {flight.airline}
+            </Text>
+          </View>
+          <View style={styles.priceWrap}>
+            <Text style={styles.price}>{formatPrice(flight.price)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.route}>
+          <View style={styles.airportCol}>
+            <Text style={styles.code}>{flight.origin}</Text>
+            <Text style={styles.time}>{formatDateTime(flight.departureTime)}</Text>
+          </View>
+
+          <View style={styles.mid}>
+            <Text style={styles.duration}>{formatDuration(flight.duration)}</Text>
+            <View style={styles.lineRow}>
+              <View style={styles.dot} />
+              <View style={styles.line} />
+              <View style={[styles.dot, styles.dotEnd]} />
             </View>
-          )}
-          <Text style={styles.airline}>{flight.airline}</Text>
+            <Text style={styles.stops}>{formatStops(flight.stops)}</Text>
+          </View>
+
+          <View style={[styles.airportCol, styles.airportColEnd]}>
+            <Text style={styles.code}>{flight.destination}</Text>
+            <Text style={styles.time}>{formatDateTime(flight.arrivalTime)}</Text>
+          </View>
         </View>
-        <Text style={styles.price}>{formatPrice(flight.price)}</Text>
-      </View>
 
-      <View style={styles.route}>
-        <Text style={styles.code}>{flight.origin}</Text>
-        <Text style={styles.arrow}>→</Text>
-        <Text style={styles.code}>{flight.destination}</Text>
-      </View>
-
-      <Text style={styles.meta}>
-        {formatDateTime(flight.departureTime)} · {formatDuration(flight.duration)} ·{' '}
-        {formatStops(flight.stops)}
-      </Text>
-
-      {flight.isDemo ? (
-        <View style={styles.demoBadge}>
-          <Text style={styles.demoText}>Sample data</Text>
-        </View>
-      ) : null}
-    </TouchableOpacity>
+        {flight.isDemo ? (
+          <View style={styles.demoBadge}>
+            <Text style={styles.demoText}>Sample data</Text>
+          </View>
+        ) : null}
+      </PressableScale>
+    </FadeInView>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radii.lg,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
   },
   airlineRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     flex: 1,
     paddingRight: 8,
   },
   logo: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
   },
   logoPlaceholder: {
-    width: 28,
-    height: 28,
-    borderRadius: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     backgroundColor: colors.primaryMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoInitial: {
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   airline: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text,
     flexShrink: 1,
   },
+  priceWrap: {
+    backgroundColor: colors.accentSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radii.sm,
+  },
   price: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.primary,
+    ...typography.price,
+    fontSize: 15,
+    color: colors.accent,
   },
   route: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 6,
+  },
+  airportCol: {
+    flex: 1,
+  },
+  airportColEnd: {
+    alignItems: 'flex-end',
   },
   code: {
+    ...typography.airport,
     fontSize: 20,
-    fontWeight: '700',
     color: colors.text,
   },
-  arrow: {
+  time: {
+    marginTop: 4,
     color: colors.textMuted,
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: '500',
   },
-  meta: {
+  mid: {
+    flex: 1.2,
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  duration: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  lineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  line: {
+    flex: 1,
+    height: 2,
+    backgroundColor: colors.primaryMuted,
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
+  },
+  dotEnd: {
+    backgroundColor: colors.accent,
+  },
+  stops: {
+    marginTop: 4,
+    fontSize: 11,
     color: colors.textMuted,
-    fontSize: 13,
+    fontWeight: '600',
   },
   demoBadge: {
     alignSelf: 'flex-start',
-    marginTop: 10,
+    marginTop: 12,
     backgroundColor: colors.demoBg,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: radii.sm,
   },
   demoText: {
     color: colors.demo,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

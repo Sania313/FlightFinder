@@ -1,10 +1,14 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Flight } from '../models/flight';
 import { useSavedFlightsContext } from '../context/SavedFlightsContext';
 import { formatDateTime, formatDuration, formatPrice, formatStops } from '../utils/format';
-import { colors } from '../theme/colors';
+import { colors, radii, typography } from '../theme/colors';
+import ScreenBackground from '../components/ScreenBackground';
+import FadeInView from '../components/FadeInView';
+import PressableScale from '../components/PressableScale';
 
 type DetailsRoute = RouteProp<{ Details: { flight: Flight } }, 'Details'>;
 
@@ -23,60 +27,94 @@ export default function DetailsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {flight.isDemo ? (
-        <View style={styles.demoBanner}>
-          <Text style={styles.demoText}>Sample data — Demo Mode</Text>
-        </View>
-      ) : null}
-
-      <Text style={styles.airline}>{flight.airline}</Text>
-      <Text style={styles.route}>
-        {flight.origin} → {flight.destination}
-      </Text>
-      <Text style={styles.price}>{formatPrice(flight.price)}</Text>
-
-      <View style={styles.metaBox}>
-        <MetaRow label="Departure" value={formatDateTime(flight.departureTime)} />
-        <MetaRow label="Arrival" value={formatDateTime(flight.arrivalTime)} />
-        <MetaRow label="Duration" value={formatDuration(flight.duration)} />
-        <MetaRow label="Stops" value={formatStops(flight.stops)} />
-        {flight.aircraft ? <MetaRow label="Aircraft" value={flight.aircraft} /> : null}
-      </View>
-
-      <Text style={styles.sectionTitle}>Itinerary</Text>
-      {flight.segments.map((segment, index) => (
-        <View key={`${segment.flightNumber ?? segment.airline}-${index}`} style={styles.segment}>
-          <Text style={styles.segmentTitle}>
-            {segment.airline}
-            {segment.flightNumber ? ` · ${segment.flightNumber}` : ''}
-          </Text>
-          <Text style={styles.segmentRoute}>
-            {segment.origin} → {segment.destination}
-          </Text>
-          {segment.originName || segment.destinationName ? (
-            <Text style={styles.segmentAirports}>
-              {[segment.originName, segment.destinationName].filter(Boolean).join(' → ')}
-            </Text>
-          ) : null}
-          <Text style={styles.segmentMeta}>
-            {formatDateTime(segment.departureTime)} → {formatDateTime(segment.arrivalTime)} ·{' '}
-            {formatDuration(segment.duration)}
-          </Text>
-          {segment.aircraft ? (
-            <Text style={styles.segmentMeta}>{segment.aircraft}</Text>
-          ) : null}
-        </View>
-      ))}
-
-      <TouchableOpacity
-        style={[styles.saveButton, saved && styles.saveButtonActive]}
-        onPress={toggleSave}
-        accessibilityRole="button"
+    <ScreenBackground>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.saveButtonText}>{saved ? 'Remove from saved' : 'Save flight'}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <FadeInView>
+          {flight.isDemo ? (
+            <View style={styles.demoBanner}>
+              <Text style={styles.demoText}>Sample data — Demo Mode</Text>
+            </View>
+          ) : null}
+
+          <LinearGradient
+            colors={[colors.primary, colors.primaryDark]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hero}
+          >
+            <Text style={styles.heroAirline}>{flight.airline}</Text>
+            <View style={styles.heroRoute}>
+              <Text style={styles.heroCode}>{flight.origin}</Text>
+              <Text style={styles.heroArrow}>→</Text>
+              <Text style={styles.heroCode}>{flight.destination}</Text>
+            </View>
+            <Text style={styles.heroPrice}>{formatPrice(flight.price)}</Text>
+          </LinearGradient>
+        </FadeInView>
+
+        <FadeInView delay={90} style={styles.metaBox}>
+          <MetaRow label="Departure" value={formatDateTime(flight.departureTime)} />
+          <MetaRow label="Arrival" value={formatDateTime(flight.arrivalTime)} />
+          <MetaRow label="Duration" value={formatDuration(flight.duration)} />
+          <MetaRow label="Stops" value={formatStops(flight.stops)} />
+          {flight.aircraft ? <MetaRow label="Aircraft" value={flight.aircraft} /> : null}
+        </FadeInView>
+
+        <FadeInView delay={150}>
+          <Text style={styles.sectionTitle}>Itinerary</Text>
+          {flight.segments.map((segment, index) => (
+            <View
+              key={`${segment.flightNumber ?? segment.airline}-${index}`}
+              style={styles.segment}
+            >
+              <View style={styles.segmentIndex}>
+                <Text style={styles.segmentIndexText}>{index + 1}</Text>
+              </View>
+              <View style={styles.segmentBody}>
+                <Text style={styles.segmentTitle}>
+                  {segment.airline}
+                  {segment.flightNumber ? ` · ${segment.flightNumber}` : ''}
+                </Text>
+                <Text style={styles.segmentRoute}>
+                  {segment.origin} → {segment.destination}
+                </Text>
+                {segment.originName || segment.destinationName ? (
+                  <Text style={styles.segmentAirports}>
+                    {[segment.originName, segment.destinationName].filter(Boolean).join(' → ')}
+                  </Text>
+                ) : null}
+                <Text style={styles.segmentMeta}>
+                  {formatDateTime(segment.departureTime)} → {formatDateTime(segment.arrivalTime)} ·{' '}
+                  {formatDuration(segment.duration)}
+                </Text>
+                {segment.aircraft ? (
+                  <Text style={styles.segmentMeta}>{segment.aircraft}</Text>
+                ) : null}
+              </View>
+            </View>
+          ))}
+        </FadeInView>
+
+        <FadeInView delay={220}>
+          <PressableScale onPress={toggleSave} accessibilityRole="button">
+            <LinearGradient
+              colors={saved ? [colors.accent, '#C45A1F'] : [colors.primary, colors.primaryDark]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.saveButton}
+            >
+              <Text style={styles.saveButtonText}>
+                {saved ? 'Remove from saved' : 'Save flight'}
+              </Text>
+            </LinearGradient>
+          </PressableScale>
+        </FadeInView>
+      </ScrollView>
+    </ScreenBackground>
   );
 }
 
@@ -92,48 +130,60 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 48,
   },
   demoBanner: {
     backgroundColor: colors.demoBg,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: radii.sm,
     marginBottom: 12,
   },
   demoText: {
     color: colors.demo,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  airline: {
+  hero: {
+    borderRadius: radii.lg,
+    padding: 20,
+    marginBottom: 14,
+  },
+  heroAirline: {
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  heroRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroCode: {
+    color: colors.white,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  heroArrow: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 20,
+  },
+  heroPrice: {
+    marginTop: 14,
+    color: colors.white,
     fontSize: 22,
     fontWeight: '800',
-    color: colors.text,
-  },
-  route: {
-    fontSize: 18,
-    color: colors.primary,
-    fontWeight: '700',
-    marginTop: 4,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.accent,
-    marginTop: 8,
-    marginBottom: 16,
   },
   metaBox: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
+    borderColor: colors.borderSoft,
+    padding: 16,
     marginBottom: 20,
-    gap: 10,
+    gap: 12,
   },
   metaRow: {
     flexDirection: 'row',
@@ -146,24 +196,42 @@ const styles = StyleSheet.create({
   },
   metaValue: {
     color: colors.text,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 14,
     flexShrink: 1,
     textAlign: 'right',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    ...typography.title,
+    fontSize: 17,
     color: colors.text,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   segment: {
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderSoft,
     padding: 14,
     marginBottom: 10,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  segmentIndex: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentIndexText: {
+    color: colors.primary,
+    fontWeight: '800',
+    fontSize: 13,
+  },
+  segmentBody: {
+    flex: 1,
   },
   segmentTitle: {
     fontWeight: '700',
@@ -172,7 +240,7 @@ const styles = StyleSheet.create({
   },
   segmentRoute: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.primary,
   },
   segmentAirports: {
@@ -186,18 +254,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   saveButton: {
-    marginTop: 12,
-    backgroundColor: colors.primary,
-    padding: 14,
-    borderRadius: 8,
+    marginTop: 8,
+    paddingVertical: 15,
+    borderRadius: radii.sm,
     alignItems: 'center',
   },
-  saveButtonActive: {
-    backgroundColor: colors.accent,
-  },
   saveButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: colors.white,
+    fontWeight: '800',
     fontSize: 16,
   },
 });

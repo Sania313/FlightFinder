@@ -19,12 +19,18 @@ cp .env.example .env
 Edit `.env`:
 
 ```
-EXPO_PUBLIC_SERPAPI_KEY=your_serpapi_key_here
+SERPAPI_KEY=your_serpapi_key_here
 ```
 
 Never commit a real API key. `.env` is gitignored.
 
-3. Start the app:
+3. Start the local API proxy (terminal 1):
+
+```bash
+npm run proxy
+```
+
+4. Start the app (terminal 2):
 
 ```bash
 npm start
@@ -32,11 +38,22 @@ npm start
 
 Then press `w` for web, `a` for Android, or `i` for iOS (simulator/device via Expo Go).
 
+Demo Mode needs neither the key nor the proxy.
+
+### Why a proxy?
+
+SerpAPI does not send CORS headers, so a browser cannot call it directly — a web-only
+`Failed to fetch` / CORS error is the result. `server/proxy.mjs` forwards the request
+server-side and keeps `SERPAPI_KEY` out of the client bundle. The app resolves the proxy
+host automatically (`localhost` on web, the Expo LAN host on a device); override it with
+`EXPO_PUBLIC_API_PROXY_URL` if needed.
+
 ### Useful scripts
 
 | Command | Description |
 |---------|-------------|
 | `npm start` | Start Expo dev server |
+| `npm run proxy` | Start the local SerpAPI proxy |
 | `npm run web` | Open web |
 | `npm run android` | Open Android |
 | `npm run ios` | Open iOS |
@@ -55,13 +72,14 @@ Suggested demo search: **YYZ → LHR**, future departure/return dates, 1 passeng
 - [ ] Open a result → details show itinerary segments
 - [ ] Save a flight → appears on Saved tab after restart
 - [ ] Saving the same flight twice does not create duplicates
-- [ ] Live search (with key): loading state; Search button disabled while loading
-- [ ] Error path: invalid key or offline → error message + Use Demo Mode
+- [ ] Live search (proxy running): loading state; Search button disabled while loading
+- [ ] Error path: stop the proxy or go offline → error message + Use Demo Mode
 - [ ] Layout readable at phone width and in a desktop browser
 
 ## Project structure (important files)
 
-- `src/services/serpApi.ts` — SerpAPI request
+- `src/services/serpApi.ts` — SerpAPI request (direct on native, via proxy on web)
+- `server/proxy.mjs` — local proxy that keeps the API key server-side
 - `src/services/flightMapper.ts` — response → app `Flight` model
 - `src/data/demoFlights.ts` — Demo Mode sample data
 - `src/storage/savedFlights.ts` — AsyncStorage persistence
